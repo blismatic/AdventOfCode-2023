@@ -1,8 +1,6 @@
 from aocd import get_data
 from credentials import session
 
-from pprint import pprint
-
 
 def parse(puzzle_input):
     """Parse input."""
@@ -30,7 +28,6 @@ def parse(puzzle_input):
         game_info["rounds"] = rounds_info
         games.append(game_info)
 
-    # pprint(games)
     return games
 
 
