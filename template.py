@@ -1,10 +1,15 @@
 from aocd import get_data
 from credentials import session
 
+from pprint import pprint
+
+example_input = """"""
+
 
 def parse(puzzle_input):
     """Parse input."""
     print(puzzle_input)
+    print()
     pass
 
 
@@ -28,7 +33,8 @@ def solve(puzzle_input):
 
 
 if __name__ == "__main__":
+    solutions = solve(example_input)
     puzzle_input = get_data(day=1, year=2023, session=session)
-    solutions = solve(puzzle_input)
+    # solutions = solve(puzzle_input)
 
     print("\n".join(str(solution) for solution in solutions))
