@@ -118,8 +118,9 @@ def different_arrangements_2(record: str, sizes: tuple[int]) -> int:
 #             valid_amount += 1
 #     return valid_amount
 
-
-print(different_arrangements_2(record="???.###", sizes=(1, 1, 3)))
+print('record = ".??..??...?##.", sizes = (1, 1, 3)')
+print("-" * 10)
+print(different_arrangements_2(record=".??..??...?##.", sizes=(1, 1, 3)))
 print()
 
 
@@ -152,15 +153,15 @@ def solve(puzzle_input):
     data = parse(puzzle_input)
     solution2 = None
     solution1 = None
-    solution1 = part1(data)
-    solution2 = part2(data)
+    # solution1 = part1(data)
+    # solution2 = part2(data)
 
     return solution1, solution2
 
 
 if __name__ == "__main__":
-    # solutions = solve(example_input)
+    solutions = solve(example_input)
     puzzle_input = get_data(day=12, year=2023, session=session)
-    solutions = solve(puzzle_input)
+    # solutions = solve(puzzle_input)
 
     print("\n".join(str(solution) for solution in solutions))
