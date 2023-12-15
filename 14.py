@@ -1,9 +1,7 @@
 from aocd import get_data
 from credentials import session
-from tqdm import tqdm
 
 from typing import Literal
-from pprint import pprint
 import re
 from collections import Counter
 
@@ -18,17 +16,12 @@ O.#..O.#.#
 #....###..
 #OO..#...."""
 
-# example_input = """..#
-# OO.
-# .OO"""
-
 
 def parse(puzzle_input):
     """Parse input."""
-    print(puzzle_input)
-    print()
+    # print(puzzle_input)
+    # print()
     result = puzzle_input.split("\n")
-    # print(result)
     return result
 
 
@@ -37,17 +30,17 @@ def tilt(
 ) -> list[str]:
     """Helper function to simulate tilting the dish in a specific direction."""
     """
-         -- NORTH TILT --       |       -- SOUTH TILT --       |       -- EAST TILT --        |       -- WEST TILT --
-    O....#....      OOOO.#.O..  |  O....#....      .....#....  |  O....#....      ....O#....  |  O....#....      O....#....
-    O.OO#....#      OO..#....#  |  O.OO#....#      ....#....#  |  O.OO#....#      .OOO#....#  |  O.OO#....#      OOO.#....#
-    .....##...      OO..O##..O  |  .....##...      ...O.##...  |  .....##...      .....##...  |  .....##...      .....##...
-    OO.#O....O      O..#.OO...  |  OO.#O....O      ...#......  |  OO.#O....O      .OO#....OO  |  OO.#O....O      OO.#OO....
-    .O.....O#.      ........#.  |  .O.....O#.      O.O....O#O  |  .O.....O#.      ......OO#.  |  .O.....O#.      OO......#.
-    O.#..O.#.#  ->  ..#....#.#  |  O.#..O.#.#  ->  O.#..O.#.#  |  O.#..O.#.#  ->  .O#...O#.#  |  O.#..O.#.#  ->  O.#O...#.#
-    ..O..#O..O      ..O..#.O.O  |  ..O..#O..O      O....#....  |  ..O..#O..O      ....O#..OO  |  ..O..#O..O      O....#OO..
-    .......O..      ..O.......  |  .......O..      OO....OO..  |  .......O..      .........O  |  .......O..      O.........
-    #....###..      #....###..  |  #....###..      #OO..###..  |  #....###..      #....###..  |  #....###..      #....###..
-    #OO..#....      #....#....  |  #OO..#....      #OO.O#...O  |  #OO..#....      #..OO#....  |  #OO..#....      #OO..#....
+         -- NORTH TILT --       |       -- WEST TILT --       |       -- SOUTH TILT --        |       -- EAST TILT --
+    O....#....      OOOO.#.O..  |  OOOO.#.O..      OOOO.#O...  |  OOOO.#O...      .....#....  |  .....#....      .....#....
+    O.OO#....#      OO..#....#  |  OO..#....#      OO..#....#  |  OO..#....#      ....#.O..#  |  ....#.O..#      ....#...O#
+    .....##...      OO..O##..O  |  OO..O##..O      OOO..##O..  |  OOO..##O..      O..O.##...  |  O..O.##...      ...OO##...
+    OO.#O....O      O..#.OO...  |  O..#.OO...      O..#OO....  |  O..#OO....      O.O#......  |  O.O#......      .OO#......
+    .O.....O#.      ........#.  |  ........#.      ........#.  |  ........#.      O.O....O#.  |  O.O....O#.      .....OOO#.
+    O.#..O.#.#  ->  ..#....#.#  |  ..#....#.#  ->  ..#....#.#  |  ..#....#.#  ->  O.#..O.#.#  |  O.#..O.#.#  ->  .O#...O#.#
+    ..O..#O..O      ..O..#.O.O  |  ..O..#.O.O      O....#OO..  |  O....#OO..      O....#....  |  O....#....      ....O#....
+    .......O..      ..O.......  |  ..O.......      O.........  |  O.........      OO....OO..  |  OO....OO..      ......OOOO
+    #....###..      #....###..  |  #....###..      #....###..  |  #....###..      #O...###..  |  #O...###..      #...O###..
+    #OO..#....      #....#....  |  #....#....      #....#....  |  #....#....      #O..O#....  |  #O..O#....      #..OO#....
     """
     if direction in ["North", "South"]:
         # Rotate the dish so that each "row" is really a single column from the original dish
@@ -98,6 +91,7 @@ def swap_rows_columns(input_list: list) -> list:
 
 
 def calculate_total_load(dish: list[str]) -> int:
+    """Helper function to calculate the total load of a given dish layout."""
     total_load = 0
     for idx, row in enumerate(dish, start=1):
         rank = len(dish) + 1 - idx
@@ -105,6 +99,15 @@ def calculate_total_load(dish: list[str]) -> int:
         if "O" in c:
             total_load += c["O"] * rank
     return total_load
+
+
+def cycle(data: list[str]) -> list[str]:
+    """Helper function to perform a single spin cycle."""
+    data = tilt(data, "North")
+    data = tilt(data, "West")
+    data = tilt(data, "South")
+    data = tilt(data, "East")
+    return data
 
 
 def part1(data):
@@ -115,32 +118,49 @@ def part1(data):
 
 def part2(data):
     """Solve part 2."""
-    for _ in tqdm(range(1_000_000_000)):
-        data = tilt(data, "North")
-        data = tilt(data, "West")
-        data = tilt(data, "South")
-        data = tilt(data, "East")
-    return calculate_total_load(data)
+    iteration = 0
+    hashmap = {iteration: data}
+
+    # Keep performing cycles and adding the resulting layout to a hashmap until a loop has been detected
+    while True:
+        data = cycle(data)
+        iteration += 1
+
+        if data in hashmap.values():
+            break
+
+        hashmap[iteration] = data
+
+    # Find the iteration of the original layout that the loop matches up with
+    for key, value in hashmap.items():
+        if value == data:
+            loop_beginning = key
+
+    # Calculate how many spin cycles it takes to perform a loop
+    loop_distance = iteration - loop_beginning
+
+    # How far from the start of the loop do we have to move, to get to the layout that our target would be?
+    target = 1_000_000_000
+    answer_offset = (target - loop_beginning) % loop_distance
+
+    answer_iteration = loop_beginning + answer_offset
+    layout_after_target_cycles = hashmap[answer_iteration]
+
+    return calculate_total_load(layout_after_target_cycles)
 
 
 def solve(puzzle_input):
     """Solve the puzzle for the given input."""
     data = parse(puzzle_input)
-    # print(tilt(data, "North"))
-    # print(tilt(data, "South"))
-    # print(tilt(data, "East"))
-    # print(tilt(data, "West"))
     solution1 = part1(data)
     solution2 = part2(data)
-    # solution1 = None
-    # solution2 = None
 
     return solution1, solution2
 
 
 if __name__ == "__main__":
-    solutions = solve(example_input)
+    # solutions = solve(example_input)
     puzzle_input = get_data(day=14, year=2023, session=session)
-    # solutions = solve(puzzle_input)
+    solutions = solve(puzzle_input)
 
     print("\n".join(str(solution) for solution in solutions))
