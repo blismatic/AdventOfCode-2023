@@ -69,11 +69,15 @@ def part1(data):
             curr_x += meters
         dig_site.append((curr_x, curr_y))
 
-    perim = perimeter(dig_site)
-    inside_area = Polygon(dig_site).area
+    # Pick's theorem: A = i + (b / 2) - 1
+    A = Polygon(dig_site).area
+    b = perimeter(dig_site)
 
-    # Pick's theorem
-    return int(inside_area + (perim / 2) - 1)
+    # Solving for i...
+    i = A - (b / 2) + 1
+
+    # What we want is i + b, (all the points including the boundary)
+    return int(i) + b
 
 
 def part2(data):
